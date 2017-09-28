@@ -17,36 +17,34 @@ namespace ProjectUno
         PathFinder pathFinder;
         bool inMovement;
 
-        public testMan(Rectangle _rect, Texture2D _texture, Tile[,] map, Tile _target)
+        public testMan(Rectangle _rect, Texture2D _texture)
         {
             rect = _rect;
             texture = _texture;
 
-            current = getCurrentTile(map);
-            target = _target;
-            pathFinder = new PathFinder(current, target, map);
             inMovement = false;
         }
 
         public void Update(Tile[,] map)
         {
             current = getCurrentTile(map);
-            if (!inMovement && (current.rect != target.rect))
-            {
-                inMovement = true;
-                pathFinder = new PathFinder(current, target, map);
-            }
 
             if(inMovement)
             {
-                if(pathFinder.route.Count() != 0)
+                if (rect.Location == pathFinder.route.Peek().rect.Location)
                 {
-                    rect = pathFinder.route.Peek().rect;
-                    pathFinder.route.Pop();
+                    if (pathFinder.route.Count() == 1)
+                    {
+                        inMovement = false;
+                    }
+                    else
+                    {
+                        pathFinder.route.Pop();
+                    }
                 }
                 else
                 {
-                    inMovement = false;
+                    rect.Location = moveTowardsTarget();
                 }
             }
         }
@@ -58,15 +56,7 @@ namespace ProjectUno
 
         private Tile getCurrentTile(Tile[,] map)
         {
-            Tile _tile = map[0,0];
-            foreach(Tile t in map)
-            {
-                if(t.rect == rect)
-                {
-                    _tile = t;
-                }
-            }
-            return _tile;
+            return map[rect.X / 32, rect.Y / 32];
         }
 
         private Point moveTowardsTarget()
@@ -95,6 +85,14 @@ namespace ProjectUno
                     newX -= 1;
                 }
             }
-            return new Point(newX, newY);        }
+            return new Point(newX, newY);
+        }
+
+        public void setTarget(Tile _target, Tile[,] map)
+        {
+            target = _target;
+            inMovement = true;
+            pathFinder = new PathFinder(current, target, map);
+        }
     }
 }

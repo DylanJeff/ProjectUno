@@ -48,7 +48,8 @@ namespace ProjectUno
                 }
             }
 
-            dude = new testMan(new Rectangle(0, 0, 32, 32), peopleTextures["testMan"], map, map[10,7]);
+            dude = new testMan(new Rectangle(0, 0, 32, 32), peopleTextures["testMan"]);
+            dude.setTarget(map[4, 7], map);
         }
 
         protected override void UnloadContent()
