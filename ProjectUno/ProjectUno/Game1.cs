@@ -37,6 +37,7 @@ namespace ProjectUno
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             tileTextures.Add("ground", Content.Load<Texture2D>("Tiles/ground"));
+            tileTextures.Add("wall", Content.Load<Texture2D>("Tiles/wall"));
 
             peopleTextures.Add("testMan", Content.Load<Texture2D>("People/testMan"));
 
@@ -48,8 +49,65 @@ namespace ProjectUno
                 }
             }
 
-            dude = new testMan(new Rectangle(0, 0, 32, 32), peopleTextures["testMan"]);
-            dude.setTarget(map[4, 7], map);
+            map[2, 0].setTexture(tileTextures["wall"]);
+            map[2, 0].walkable = false;
+
+            map[2, 1].setTexture(tileTextures["wall"]);
+            map[2, 1].walkable = false;
+
+            map[2, 2].setTexture(tileTextures["wall"]);
+            map[2, 2].walkable = false;
+
+            map[2, 3].setTexture(tileTextures["wall"]);
+            map[2, 3].walkable = false;
+
+            map[2, 4].setTexture(tileTextures["wall"]);
+            map[2, 4].walkable = false;
+
+            map[2, 5].setTexture(tileTextures["wall"]);
+            map[2, 5].walkable = false;
+
+            map[2, 6].setTexture(tileTextures["wall"]);
+            map[2, 6].walkable = false;
+
+            map[2, 7].setTexture(tileTextures["wall"]);
+            map[2, 7].walkable = false;
+
+            map[9, 8].setTexture(tileTextures["wall"]);
+            map[9, 8].walkable = false;
+
+            map[9, 7].setTexture(tileTextures["wall"]);
+            map[9, 7].walkable = false;
+
+            map[9, 6].setTexture(tileTextures["wall"]);
+            map[9, 6].walkable = false;
+
+            map[9, 5].setTexture(tileTextures["wall"]);
+            map[9, 5].walkable = false;
+
+            map[9, 4].setTexture(tileTextures["wall"]);
+            map[9, 4].walkable = false;
+
+            map[9, 3].setTexture(tileTextures["wall"]);
+            map[9, 3].walkable = false;
+
+            map[9, 0].setTexture(tileTextures["wall"]);
+            map[9, 0].walkable = false;
+
+            map[13, 0].setTexture(tileTextures["wall"]);
+            map[13, 0].walkable = false;
+
+            map[13, 1].setTexture(tileTextures["wall"]);
+            map[13, 1].walkable = false;
+
+            map[13, 2].setTexture(tileTextures["wall"]);
+            map[13, 2].walkable = false;
+
+            map[13, 3].setTexture(tileTextures["wall"]);
+            map[13, 3].walkable = false;
+
+            dude = new testMan(new Rectangle(0, 0, 32, 32), peopleTextures["testMan"], map);
+            dude.setTarget(map[15, 0], map);
         }
 
         protected override void UnloadContent()

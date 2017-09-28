@@ -44,5 +44,10 @@ namespace ProjectUno
         {
             spriteBatch.Draw(texture, rect, Color.White);
         }
+
+        public void setTexture(Texture2D _texture)
+        {
+            texture = _texture;
+        }
     }
 }

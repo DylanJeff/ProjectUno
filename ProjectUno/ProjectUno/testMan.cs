@@ -17,11 +17,11 @@ namespace ProjectUno
         PathFinder pathFinder;
         bool inMovement;
 
-        public testMan(Rectangle _rect, Texture2D _texture)
+        public testMan(Rectangle _rect, Texture2D _texture, Tile[,] map)
         {
             rect = _rect;
             texture = _texture;
-
+            current = getCurrentTile(map);
             inMovement = false;
         }
 
