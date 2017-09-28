@@ -31,7 +31,7 @@ namespace ProjectUno
         public void Update(Tile[,] map)
         {
             current = getCurrentTile(map);
-            if (!inMovement && (current.rect.Location != pathFinder.route.Peek().rect.Location))
+            if (!inMovement && (current.rect != target.rect))
             {
                 inMovement = true;
                 pathFinder = new PathFinder(current, target, map);
@@ -39,17 +39,14 @@ namespace ProjectUno
 
             if(inMovement)
             {
-                rect.Location = moveTowardsTarget();
-                if(current.rect.Location == pathFinder.route.Peek().rect.Location)
+                if(pathFinder.route.Count() != 0)
                 {
-                    if(pathFinder.route.Count == 0)
-                    {
-                        inMovement = false;
-                    }
-                    else
-                    {
-                        pathFinder.route.Pop();
-                    }                    
+                    rect = pathFinder.route.Peek().rect;
+                    pathFinder.route.Pop();
+                }
+                else
+                {
+                    inMovement = false;
                 }
             }
         }
@@ -64,7 +61,7 @@ namespace ProjectUno
             Tile _tile = map[0,0];
             foreach(Tile t in map)
             {
-                if(t.rect.Contains(rect.X, rect.Y))
+                if(t.rect == rect)
                 {
                     _tile = t;
                 }
