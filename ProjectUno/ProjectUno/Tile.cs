@@ -17,7 +17,7 @@ namespace ProjectUno
 
         //PATHFINDING
         public int indexX, indexY;
-        public int costA, costB, costT;
+        public int costA, costB, costT, costDiscount, speed;
         public bool isStart, isTarget, walkable;
         public Tile rootTile;
 
@@ -30,6 +30,8 @@ namespace ProjectUno
             costA = 0;
             costB = 0;
             costT = 0;
+            costDiscount = 0;
+            speed = 1;
             isStart = false;
             isTarget = false;
             walkable = true;
@@ -46,9 +48,12 @@ namespace ProjectUno
             spriteBatch.Draw(texture, rect, Color.White);
         }
 
-        public void setTexture(Texture2D _texture)
+        public void setType(TileType type)
         {
-            texture = _texture;
+            texture = type.texture;
+            walkable = type.walkable;
+            costDiscount = type.discount;
+            speed = type.speed;
         }
 
         public bool checkClicked(MouseState msNow, MouseState msPrev)

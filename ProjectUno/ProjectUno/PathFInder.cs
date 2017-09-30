@@ -99,7 +99,7 @@ namespace ProjectUno
             //ASSIGN COST T VALUES TO THE TILES
             foreach(Tile t in map)
             {
-                t.costT = t.costA + t.costB;
+                t.costT = ((t.costA + t.costB) / 100) * (100 - t.costDiscount);
             }
 
             //ASSIGN ROOTS TO THE TILES

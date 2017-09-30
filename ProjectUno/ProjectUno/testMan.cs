@@ -65,23 +65,54 @@ namespace ProjectUno
 
         private Point moveTowardsTarget()
         {
+            Rectangle targetRect = pathFinder.route.Peek().rect;
             int newX = 0;
             int newY = 0;
+            int xDif = Math.Abs(rect.X - targetRect.X);
+            int yDif = Math.Abs(rect.Y - targetRect.Y);
             if (rect.X > pathFinder.route.Peek().rect.X)
             {
-                newX = -1;
+                if(xDif % current.speed == 0)
+                {
+                    newX = -(current.speed);
+                }
+                else
+                {
+                    newX = -(xDif % current.speed);
+                }   
             }
             else if (rect.X < pathFinder.route.Peek().rect.X)
             {
-                newX = 1;
+                if (xDif % current.speed == 0)
+                {
+                    newX = current.speed;
+                }
+                else
+                {
+                    newX = xDif % current.speed;
+                }
             }
             if (rect.Y > pathFinder.route.Peek().rect.Y)
             {
-                newY = -1;
+                if (yDif % current.speed == 0)
+                {
+                    newY = -(current.speed);
+                }
+                else
+                {
+                    newY = -(yDif % current.speed);
+                }
             }
             else if (rect.Y < pathFinder.route.Peek().rect.Y)
             {
-                newY = 1;
+                if (yDif % current.speed == 0)
+                {
+                    newY = current.speed;
+                }
+                else
+                {
+                    newY = yDif % current.speed;
+                }
             }
 
             return new Point(rect.X + newX, rect.Y + newY);
