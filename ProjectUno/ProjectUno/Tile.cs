@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -48,6 +49,28 @@ namespace ProjectUno
         public void setTexture(Texture2D _texture)
         {
             texture = _texture;
+        }
+
+        public bool checkClicked(MouseState msNow, MouseState msPrev)
+        {
+            if(rect.Contains(msNow.X, msNow.Y) && msPrev.LeftButton == ButtonState.Pressed && msNow.LeftButton == ButtonState.Released)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public void resetPathFindingVariables()
+        {
+            costA = 0;
+            costB = 0;
+            costT = 0;
+            isStart = false;
+            isTarget = false;
+            rootTile = this;
         }
     }
 }

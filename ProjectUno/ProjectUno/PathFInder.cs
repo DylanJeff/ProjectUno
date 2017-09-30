@@ -46,10 +46,15 @@ namespace ProjectUno
             {
                 currentTile = costQueue.Peek();
                 costQueue.Dequeue();
-                neswCostA(ref map, ref costQueue, currentTile, 0, -1);
-                neswCostA(ref map, ref costQueue, currentTile, 1, 0);
-                neswCostA(ref map, ref costQueue, currentTile, 0, 1);
-                neswCostA(ref map, ref costQueue, currentTile, -1, 0);
+                neswCostA(ref map, ref costQueue, currentTile, 0, -1);//NORTH
+                neswCostA(ref map, ref costQueue, currentTile, 1, 0);//EAST
+                neswCostA(ref map, ref costQueue, currentTile, 0, 1);//SOUTH
+                neswCostA(ref map, ref costQueue, currentTile, -1, 0);//WEST
+
+                neswCostA(ref map, ref costQueue, currentTile, 1, -1);//NORTH-EAST
+                neswCostA(ref map, ref costQueue, currentTile, 1, 1);//SOUTH-EAST
+                neswCostA(ref map, ref costQueue, currentTile, -1, 1);//SOUTH-WEST
+                neswCostA(ref map, ref costQueue, currentTile, -1, -1);//NORTH-WEST
             }
 
             //ASSIGN COST B VALUES TO THE TILES
@@ -64,6 +69,11 @@ namespace ProjectUno
                 neswCostB(ref map, ref costQueue, currentTile, 1, 0);
                 neswCostB(ref map, ref costQueue, currentTile, 0, 1);
                 neswCostB(ref map, ref costQueue, currentTile, -1, 0);
+
+                neswCostB(ref map, ref costQueue, currentTile, 1, -1);//NORTH-EAST
+                neswCostB(ref map, ref costQueue, currentTile, 1, 1);//SOUTH-EAST
+                neswCostB(ref map, ref costQueue, currentTile, -1, 1);//SOUTH-WEST
+                neswCostB(ref map, ref costQueue, currentTile, -1, -1);//NORTH-WEST
             }
 
             //ASSIGN COST T VALUES TO THE TILES
@@ -84,6 +94,11 @@ namespace ProjectUno
                 neswRoot(ref map, ref rootingList, checkedList, currentTile, 1, 0);
                 neswRoot(ref map, ref rootingList, checkedList, currentTile, 0, 1);
                 neswRoot(ref map, ref rootingList, checkedList, currentTile, -1, 0);
+
+                neswRoot(ref map, ref rootingList, checkedList, currentTile, 1, -1);
+                neswRoot(ref map, ref rootingList, checkedList, currentTile, 1, 1);
+                neswRoot(ref map, ref rootingList, checkedList, currentTile, -1, 1);
+                neswRoot(ref map, ref rootingList, checkedList, currentTile, -1, -1);
             }
 
             //PUT TOGETHER THE ROUTE
@@ -95,6 +110,13 @@ namespace ProjectUno
             }
             while (!map[currentTile.indexX, currentTile.indexY].isStart);
 
+            //RESET TILE PATH FINDING VARIABLES
+            foreach (Tile t in map)
+            {
+                t.resetPathFindingVariables();
+            }
+
+            //SEND THE ROUTE
             return routeStack;
         }
 
@@ -159,11 +181,20 @@ namespace ProjectUno
 
         private void neswCostA(ref Tile[,] map, ref Queue<Tile> costQueue, Tile currentTile, int xChange, int yChange)
         {
+            int addition = 0;
+            if(xChange + yChange == -1 || xChange + yChange == 1)
+            {
+                addition = 10;
+            }
+            else
+            {
+                addition = 14;
+            }
             if (tileExists(currentTile.indexX + xChange, currentTile.indexY + yChange))//IS THERE A TILE IN THE GIVEN DIRECTION
             {
                 if (validationCostA(map[currentTile.indexX + xChange, currentTile.indexY + yChange]))//CAN THAT TILE BE USED
                 {
-                    map[currentTile.indexX + xChange, currentTile.indexY + yChange].costA = currentTile.costA + 10;
+                    map[currentTile.indexX + xChange, currentTile.indexY + yChange].costA = currentTile.costA + addition;
                     costQueue.Enqueue(map[currentTile.indexX + xChange, currentTile.indexY + yChange]);
                 }
             }
@@ -171,11 +202,20 @@ namespace ProjectUno
 
         private void neswCostB(ref Tile[,] map, ref Queue<Tile> costQueue, Tile currentTile, int xChange, int yChange)
         {
+            int addition = 0;
+            if (xChange + yChange == -1 || xChange + yChange == 1)
+            {
+                addition = 10;
+            }
+            else
+            {
+                addition = 14;
+            }
             if (tileExists(currentTile.indexX + xChange, currentTile.indexY + yChange))//IS THERE A TILE IN THE GIVEN DIRECTION
             {
                 if (validationCostB(map[currentTile.indexX + xChange, currentTile.indexY + yChange]))//CAN THAT TILE BE USED
                 {
-                    map[currentTile.indexX + xChange, currentTile.indexY + yChange].costB = currentTile.costB + 10;
+                    map[currentTile.indexX + xChange, currentTile.indexY + yChange].costB = currentTile.costB + addition;
                     costQueue.Enqueue(map[currentTile.indexX + xChange, currentTile.indexY + yChange]);
                 }
             }

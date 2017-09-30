@@ -61,38 +61,33 @@ namespace ProjectUno
 
         private Point moveTowardsTarget()
         {
-            int newX = rect.X;
-            int newY = rect.Y;
-            if(pathFinder.route.Peek().indexX == current.indexX)
+            int newX = 0;
+            int newY = 0;
+            if (rect.X > pathFinder.route.Peek().rect.X)
             {
-                if (pathFinder.route.Peek().indexY > current.indexY)
-                {
-                    newY += 1;
-                }
-                else
-                {
-                    newY -= 1;
-                }
+                newX = -1;
             }
-            else if (pathFinder.route.Peek().indexY == current.indexY)
+            else if (rect.X < pathFinder.route.Peek().rect.X)
             {
-                if (pathFinder.route.Peek().indexX > current.indexX)
-                {
-                    newX += 1;
-                }
-                else
-                {
-                    newX -= 1;
-                }
+                newX = 1;
             }
-            return new Point(newX, newY);
+            if (rect.Y > pathFinder.route.Peek().rect.Y)
+            {
+                newY = -1;
+            }
+            else if (rect.Y < pathFinder.route.Peek().rect.Y)
+            {
+                newY = 1;
+            }
+
+            return new Point(rect.X + newX, rect.Y + newY);
         }
 
-        public void setTarget(Tile _target, Tile[,] map)
+        public void setTarget(Tile _target, Tile[,] _map)
         {
             target = _target;
             inMovement = true;
-            pathFinder = new PathFinder(current, target, map);
+            pathFinder = new PathFinder(current, target, _map);
         }
     }
 }
