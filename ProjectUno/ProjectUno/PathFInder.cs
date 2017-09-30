@@ -10,6 +10,7 @@ namespace ProjectUno
     {
         int startX, startY, targetX, targetY, mapXLength, mapYLength;
         public Stack<Tile> route;
+        bool abort;
 
         public PathFinder(Tile _start, Tile _target, Tile[,] map)
         {
@@ -19,12 +20,14 @@ namespace ProjectUno
             targetY = _target.indexY;
             mapXLength = map.GetLength(0);
             mapYLength = map.GetLength(1);
+            abort = false;
             route = findRoute(map);
         }
 
         private Stack<Tile> findRoute(Tile[,] map)
         {
             Tile currentTile;
+            abort = false;
             Stack<Tile> routeStack = new Stack<Tile>();
             Queue<Tile> costQueue = new Queue<Tile>();
             List<Tile> rootingList = new List<Tile>();
@@ -44,6 +47,11 @@ namespace ProjectUno
             currentTile = costQueue.Peek();
             while(!currentTile.isTarget)
             {
+                if (costQueue.Count == 0)
+                {
+                    abort = true;
+                    break;
+                }
                 currentTile = costQueue.Peek();
                 costQueue.Dequeue();
                 neswCostA(ref map, ref costQueue, currentTile, 0, -1);//NORTH
@@ -51,10 +59,22 @@ namespace ProjectUno
                 neswCostA(ref map, ref costQueue, currentTile, 0, 1);//SOUTH
                 neswCostA(ref map, ref costQueue, currentTile, -1, 0);//WEST
 
-                neswCostA(ref map, ref costQueue, currentTile, 1, -1);//NORTH-EAST
-                neswCostA(ref map, ref costQueue, currentTile, 1, 1);//SOUTH-EAST
-                neswCostA(ref map, ref costQueue, currentTile, -1, 1);//SOUTH-WEST
-                neswCostA(ref map, ref costQueue, currentTile, -1, -1);//NORTH-WEST
+                diagonalCostA(ref map, ref costQueue, currentTile, 1, -1);//NORTH-EAST
+                diagonalCostA(ref map, ref costQueue, currentTile, 1, 1);//SOUTH-EAST
+                diagonalCostA(ref map, ref costQueue, currentTile, -1, 1);//SOUTH-WEST
+                diagonalCostA(ref map, ref costQueue, currentTile, -1, -1);//NORTH-WEST
+            }
+
+            //ABORT THE PATHFINDING IF IT IS AN IMPOSSIBLE REQUEST
+            if(abort)
+            {
+                //RESET TILE PATH FINDING VARIABLES
+                foreach (Tile t in map)
+                {
+                    t.resetPathFindingVariables();
+                }
+                routeStack.Push(map[startX, startY]);
+                return routeStack;
             }
 
             //ASSIGN COST B VALUES TO THE TILES
@@ -70,10 +90,10 @@ namespace ProjectUno
                 neswCostB(ref map, ref costQueue, currentTile, 0, 1);
                 neswCostB(ref map, ref costQueue, currentTile, -1, 0);
 
-                neswCostB(ref map, ref costQueue, currentTile, 1, -1);//NORTH-EAST
-                neswCostB(ref map, ref costQueue, currentTile, 1, 1);//SOUTH-EAST
-                neswCostB(ref map, ref costQueue, currentTile, -1, 1);//SOUTH-WEST
-                neswCostB(ref map, ref costQueue, currentTile, -1, -1);//NORTH-WEST
+                diagonalCostB(ref map, ref costQueue, currentTile, 1, -1);//NORTH-EAST
+                diagonalCostB(ref map, ref costQueue, currentTile, 1, 1);//SOUTH-EAST
+                diagonalCostB(ref map, ref costQueue, currentTile, -1, 1);//SOUTH-WEST
+                diagonalCostB(ref map, ref costQueue, currentTile, -1, -1);//NORTH-WEST
             }
 
             //ASSIGN COST T VALUES TO THE TILES
@@ -95,10 +115,10 @@ namespace ProjectUno
                 neswRoot(ref map, ref rootingList, checkedList, currentTile, 0, 1);
                 neswRoot(ref map, ref rootingList, checkedList, currentTile, -1, 0);
 
-                neswRoot(ref map, ref rootingList, checkedList, currentTile, 1, -1);
-                neswRoot(ref map, ref rootingList, checkedList, currentTile, 1, 1);
-                neswRoot(ref map, ref rootingList, checkedList, currentTile, -1, 1);
-                neswRoot(ref map, ref rootingList, checkedList, currentTile, -1, -1);
+                diagonalRoot(ref map, ref rootingList, checkedList, currentTile, 1, -1);
+                diagonalRoot(ref map, ref rootingList, checkedList, currentTile, 1, 1);
+                diagonalRoot(ref map, ref rootingList, checkedList, currentTile, -1, 1);
+                diagonalRoot(ref map, ref rootingList, checkedList, currentTile, -1, -1);
             }
 
             //PUT TOGETHER THE ROUTE
@@ -181,20 +201,23 @@ namespace ProjectUno
 
         private void neswCostA(ref Tile[,] map, ref Queue<Tile> costQueue, Tile currentTile, int xChange, int yChange)
         {
-            int addition = 0;
-            if(xChange + yChange == -1 || xChange + yChange == 1)
-            {
-                addition = 10;
-            }
-            else
-            {
-                addition = 14;
-            }
             if (tileExists(currentTile.indexX + xChange, currentTile.indexY + yChange))//IS THERE A TILE IN THE GIVEN DIRECTION
             {
                 if (validationCostA(map[currentTile.indexX + xChange, currentTile.indexY + yChange]))//CAN THAT TILE BE USED
                 {
-                    map[currentTile.indexX + xChange, currentTile.indexY + yChange].costA = currentTile.costA + addition;
+                    map[currentTile.indexX + xChange, currentTile.indexY + yChange].costA = currentTile.costA + 10;
+                    costQueue.Enqueue(map[currentTile.indexX + xChange, currentTile.indexY + yChange]);
+                }
+            }
+        }
+
+        private void diagonalCostA(ref Tile[,] map, ref Queue<Tile> costQueue, Tile currentTile, int xChange, int yChange)
+        {
+            if (tileExists(currentTile.indexX + xChange, currentTile.indexY + yChange))//IS THERE A TILE IN THE GIVEN DIRECTION
+            {
+                if (validationCostA(map[currentTile.indexX + xChange, currentTile.indexY + yChange]) && map[currentTile.indexX + xChange, currentTile.indexY].walkable && map[currentTile.indexX, currentTile.indexY + yChange].walkable)//CAN THAT TILE BE USED
+                {
+                    map[currentTile.indexX + xChange, currentTile.indexY + yChange].costA = currentTile.costA + 14;
                     costQueue.Enqueue(map[currentTile.indexX + xChange, currentTile.indexY + yChange]);
                 }
             }
@@ -202,20 +225,23 @@ namespace ProjectUno
 
         private void neswCostB(ref Tile[,] map, ref Queue<Tile> costQueue, Tile currentTile, int xChange, int yChange)
         {
-            int addition = 0;
-            if (xChange + yChange == -1 || xChange + yChange == 1)
-            {
-                addition = 10;
-            }
-            else
-            {
-                addition = 14;
-            }
             if (tileExists(currentTile.indexX + xChange, currentTile.indexY + yChange))//IS THERE A TILE IN THE GIVEN DIRECTION
             {
                 if (validationCostB(map[currentTile.indexX + xChange, currentTile.indexY + yChange]))//CAN THAT TILE BE USED
                 {
-                    map[currentTile.indexX + xChange, currentTile.indexY + yChange].costB = currentTile.costB + addition;
+                    map[currentTile.indexX + xChange, currentTile.indexY + yChange].costB = currentTile.costB + 10;
+                    costQueue.Enqueue(map[currentTile.indexX + xChange, currentTile.indexY + yChange]);
+                }
+            }
+        }
+
+        private void diagonalCostB(ref Tile[,] map, ref Queue<Tile> costQueue, Tile currentTile, int xChange, int yChange)
+        {
+            if (tileExists(currentTile.indexX + xChange, currentTile.indexY + yChange))//IS THERE A TILE IN THE GIVEN DIRECTION
+            {
+                if (validationCostB(map[currentTile.indexX + xChange, currentTile.indexY + yChange]) && map[currentTile.indexX + xChange, currentTile.indexY].walkable && map[currentTile.indexX, currentTile.indexY + yChange].walkable)//CAN THAT TILE BE USED
+                {
+                    map[currentTile.indexX + xChange, currentTile.indexY + yChange].costB = currentTile.costB + 14;
                     costQueue.Enqueue(map[currentTile.indexX + xChange, currentTile.indexY + yChange]);
                 }
             }
@@ -226,6 +252,18 @@ namespace ProjectUno
             if (tileExists(currentTile.indexX + xChange, currentTile.indexY + yChange))//IS THERE A TILE IN THE GIVEN DIRECTION
             {
                 if (validationRoot(map[currentTile.indexX + xChange, currentTile.indexY + yChange], checkedList, rootingList))
+                {
+                    rootingList.Add(map[currentTile.indexX + xChange, currentTile.indexY + yChange]);
+                    map[currentTile.indexX + xChange, currentTile.indexY + yChange].rootTile = currentTile;
+                }
+            }
+        }
+
+        private void diagonalRoot(ref Tile[,] map, ref List<Tile> rootingList, List<Tile> checkedList, Tile currentTile, int xChange, int yChange)
+        {
+            if (tileExists(currentTile.indexX + xChange, currentTile.indexY + yChange))//IS THERE A TILE IN THE GIVEN DIRECTION
+            {
+                if (validationRoot(map[currentTile.indexX + xChange, currentTile.indexY + yChange], checkedList, rootingList) && map[currentTile.indexX + xChange, currentTile.indexY].walkable && map[currentTile.indexX, currentTile.indexY + yChange].walkable)
                 {
                     rootingList.Add(map[currentTile.indexX + xChange, currentTile.indexY + yChange]);
                     map[currentTile.indexX + xChange, currentTile.indexY + yChange].rootTile = currentTile;

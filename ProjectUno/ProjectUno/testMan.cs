@@ -40,6 +40,10 @@ namespace ProjectUno
                     else
                     {
                         pathFinder.route.Pop();
+                        if(!pathFinder.route.Peek().walkable)
+                        {
+                            inMovement = false;
+                        }
                     }
                 }
                 else
