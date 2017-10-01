@@ -48,7 +48,7 @@ namespace ProjectUno
 
             tileTextures.Add("ground", Content.Load<Texture2D>("Tiles/ground"));
             tileTextures.Add("wall", Content.Load<Texture2D>("Tiles/wall"));
-            tileTextures.Add("concrete", Content.Load<Texture2D>("Tiles/concrete"));
+            tileTextures.Add("concrete", Content.Load<Texture2D>("Tiles/concrete"));//ADDS CONCRETE TEXTURE
 
             peopleTextures.Add("testMan", Content.Load<Texture2D>("People/testMan"));
 
