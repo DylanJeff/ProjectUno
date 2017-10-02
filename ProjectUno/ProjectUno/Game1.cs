@@ -17,7 +17,7 @@ namespace ProjectUno
         Dictionary<string, TileType> tileTypes = new Dictionary<string, TileType>();
 
         Tile[,] map;
-        Matrix cameraMatrix;
+        int mapWidth, mapHeight, cameraX, cameraY, cameraWidth, cameraHeight;
 
         testMan dude;
 
@@ -35,7 +35,12 @@ namespace ProjectUno
 
         protected override void Initialize()
         {
-            cameraMatrix = Matrix.CreateTranslation(0, 0, 0);
+            mapWidth = 64;
+            mapHeight = 36;
+            cameraX = 0;
+            cameraY = 0;
+            cameraWidth = 32 * 32;
+            cameraHeight = 18 * 32;
             base.Initialize();
         }
 
@@ -88,7 +93,7 @@ namespace ProjectUno
 
             foreach(Tile t in map)
             {
-                if(t.checkClicked(msNow, msPrev))
+                if(t.checkClicked(msNow, msPrev, cameraX, cameraY))
                 {
                     t.setType(testType);
                 }
@@ -108,24 +113,24 @@ namespace ProjectUno
 
             if (msNow.RightButton == ButtonState.Released && msPrev.RightButton == ButtonState.Pressed)
             {
-                dude.setTarget(map[(msNow.X) / 32, (msNow.Y) / 32], map);
+                dude.setTarget(map[(msNow.X-cameraX) / 32, (msNow.Y-cameraY) / 32], map);
             }
 
-            if (kbNow.IsKeyDown(Keys.W) && cameraMatrix.Translation.Y > 0)
+            if (kbNow.IsKeyDown(Keys.W) && cameraY < 0)
             {
-                cameraMatrix += Matrix.CreateTranslation(8, 0, 0);
+                cameraY += 8;
             }
-            if (kbNow.IsKeyDown(Keys.A) && cameraMatrix.Translation.X > 0)
+            if (kbNow.IsKeyDown(Keys.A) && cameraX < 0)
             {
-                cameraMatrix += Matrix.CreateTranslation(8, 0, 0);
+                cameraX += 8;
             }
-            if (kbNow.IsKeyDown(Keys.S) && cameraMatrix.Translation.Y < (32*map.GetLength(1))+576)
+            if (kbNow.IsKeyDown(Keys.S) && cameraY > -(32*mapHeight)+cameraHeight)
             {
-                cameraMatrix += Matrix.CreateTranslation(0, -8, 0);
+                cameraY += -8;
             }
-            if (kbNow.IsKeyDown(Keys.D) && cameraMatrix.Translation.X < (32*map.GetLength(0))+1024)
+            if (kbNow.IsKeyDown(Keys.D) && cameraX > -(32*mapWidth)+cameraWidth)
             {
-                cameraMatrix += Matrix.CreateTranslation(-8, 0, 0);
+                cameraX += -8;
             }
 
             kbPrev = kbNow;
@@ -139,7 +144,7 @@ namespace ProjectUno
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.White);
-            spriteBatch.Begin(SpriteSortMode.BackToFront, null, null, null, null, null, cameraMatrix);
+            spriteBatch.Begin(SpriteSortMode.BackToFront, null, null, null, null, null, Matrix.CreateTranslation(cameraX, cameraY, 0));
 
             foreach (Tile t in map)
             {
