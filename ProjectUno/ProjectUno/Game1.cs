@@ -11,15 +11,13 @@ namespace ProjectUno
         SpriteBatch spriteBatch;
         MouseState msNow, msPrev;
         KeyboardState kbNow, kbPrev;
-        Viewport view1;
 
         Dictionary<string, Texture2D> tileTextures = new Dictionary<string, Texture2D>();
         Dictionary<string, Texture2D> peopleTextures = new Dictionary<string, Texture2D>();
         Dictionary<string, TileType> tileTypes = new Dictionary<string, TileType>();
 
-        int mapLength = 36;//TILES IN THE Y AXIS
-        int mapWidth = 64;//TILES IN THE X AXIS
         Tile[,] map;
+        Matrix cameraMatrix;
 
         testMan dude;
 
@@ -30,20 +28,14 @@ namespace ProjectUno
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
 
-            //graphics.PreferredBackBufferWidth = 1024;
-            //graphics.PreferredBackBufferHeight = 576;
+            graphics.PreferredBackBufferWidth = 1024;
+            graphics.PreferredBackBufferHeight = 576;
             this.IsMouseVisible = true;
         }
 
         protected override void Initialize()
         {
-            view1 = new Viewport();
-            view1.X = 0;
-            view1.Y = 0;
-            view1.Width = 1024;
-            view1.Height = 576;
-            view1.MinDepth = 0;
-            view1.MaxDepth = 1;
+            cameraMatrix = Matrix.CreateTranslation(0, 0, 0);
             base.Initialize();
         }
 
@@ -66,10 +58,10 @@ namespace ProjectUno
             tileTypes.Add("wall", new TileType(tileTextures["wall"], false, 0, 0));
             tileTypes.Add("concrete", new TileType(tileTextures["concrete"], true, 40, 2));
 
-            map = new Tile[mapWidth, mapLength];
-            for (int y = 0; y < mapLength; y++)
+            map = new Tile[64, 36];
+            for (int y = 0; y < 36; y++)
             {
-                for (int x = 0; x < mapWidth; x++)
+                for (int x = 0; x < 64; x++)
                 {
                     map[x, y] = new Tile(new Rectangle(x * 32, y * 32, 32, 32), tileTextures["ground"], x, y);
                 }
@@ -96,7 +88,7 @@ namespace ProjectUno
 
             foreach(Tile t in map)
             {
-                if(t.checkClicked(msNow, msPrev, view1))
+                if(t.checkClicked(msNow, msPrev))
                 {
                     t.setType(testType);
                 }
@@ -114,38 +106,26 @@ namespace ProjectUno
                 }
             }
 
-            if(kbNow.IsKeyDown(Keys.D))
-            {
-                if(view1.X > -(mapWidth*32)+2048)
-                {
-                    view1.X -= 5;
-                }      
-            }
-            if(kbNow.IsKeyDown(Keys.A))
-            {
-                if(view1.X < 0)
-                {
-                    view1.X += 5;
-                }   
-            }
-            if (kbNow.IsKeyDown(Keys.S))
-            {
-                if (view1.Y > -1024)
-                {
-                    view1.Y -= 5;
-                }
-            }
-            if (kbNow.IsKeyDown(Keys.W))
-            {
-                if (view1.Y < 0)
-                {
-                    view1.Y += 5;
-                }
-            }
-
             if (msNow.RightButton == ButtonState.Released && msPrev.RightButton == ButtonState.Pressed)
             {
-                dude.setTarget(map[(msNow.X-view1.X) / 32, (msNow.Y-view1.Y) / 32], map);
+                dude.setTarget(map[(msNow.X) / 32, (msNow.Y) / 32], map);
+            }
+
+            if (kbNow.IsKeyDown(Keys.W) && cameraMatrix.Translation.Y > 0)
+            {
+                cameraMatrix += Matrix.CreateTranslation(8, 0, 0);
+            }
+            if (kbNow.IsKeyDown(Keys.A) && cameraMatrix.Translation.X > 0)
+            {
+                cameraMatrix += Matrix.CreateTranslation(8, 0, 0);
+            }
+            if (kbNow.IsKeyDown(Keys.S) && cameraMatrix.Translation.Y < (32*map.GetLength(1))+576)
+            {
+                cameraMatrix += Matrix.CreateTranslation(0, -8, 0);
+            }
+            if (kbNow.IsKeyDown(Keys.D) && cameraMatrix.Translation.X < (32*map.GetLength(0))+1024)
+            {
+                cameraMatrix += Matrix.CreateTranslation(-8, 0, 0);
             }
 
             kbPrev = kbNow;
@@ -159,10 +139,9 @@ namespace ProjectUno
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.White);
-            graphics.GraphicsDevice.Viewport = view1;
-            spriteBatch.Begin();
+            spriteBatch.Begin(SpriteSortMode.BackToFront, null, null, null, null, null, cameraMatrix);
 
-            foreach(Tile t in map)
+            foreach (Tile t in map)
             {
                 t.Draw(spriteBatch);
             }
