@@ -11,12 +11,15 @@ namespace ProjectUno
         SpriteBatch spriteBatch;
         MouseState msNow, msPrev;
         KeyboardState kbNow, kbPrev;
+        Viewport view1;
 
         Dictionary<string, Texture2D> tileTextures = new Dictionary<string, Texture2D>();
         Dictionary<string, Texture2D> peopleTextures = new Dictionary<string, Texture2D>();
         Dictionary<string, TileType> tileTypes = new Dictionary<string, TileType>();
 
-        Tile[,] map = new Tile[32, 18];
+        int mapLength = 36;//TILES IN THE Y AXIS
+        int mapWidth = 64;//TILES IN THE X AXIS
+        Tile[,] map;
 
         testMan dude;
 
@@ -27,14 +30,20 @@ namespace ProjectUno
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
 
-            graphics.PreferredBackBufferWidth = 1024;
-            graphics.PreferredBackBufferHeight = 576;
+            //graphics.PreferredBackBufferWidth = 1024;
+            //graphics.PreferredBackBufferHeight = 576;
             this.IsMouseVisible = true;
         }
 
         protected override void Initialize()
-        {        
-
+        {
+            view1 = new Viewport();
+            view1.X = 0;
+            view1.Y = 0;
+            view1.Width = 1024;
+            view1.Height = 576;
+            view1.MinDepth = 0;
+            view1.MaxDepth = 1;
             base.Initialize();
         }
 
@@ -57,9 +66,10 @@ namespace ProjectUno
             tileTypes.Add("wall", new TileType(tileTextures["wall"], false, 0, 0));
             tileTypes.Add("concrete", new TileType(tileTextures["concrete"], true, 40, 2));
 
-            for (int y = 0; y < 18; y++)
+            map = new Tile[mapWidth, mapLength];
+            for (int y = 0; y < mapLength; y++)
             {
-                for (int x = 0; x < 32; x++)
+                for (int x = 0; x < mapWidth; x++)
                 {
                     map[x, y] = new Tile(new Rectangle(x * 32, y * 32, 32, 32), tileTextures["ground"], x, y);
                 }
@@ -86,7 +96,7 @@ namespace ProjectUno
 
             foreach(Tile t in map)
             {
-                if(t.checkClicked(msNow, msPrev))
+                if(t.checkClicked(msNow, msPrev, view1))
                 {
                     t.setType(testType);
                 }
@@ -104,21 +114,52 @@ namespace ProjectUno
                 }
             }
 
-            if(msNow.RightButton == ButtonState.Released && msPrev.RightButton == ButtonState.Pressed)
+            if(kbNow.IsKeyDown(Keys.D))
             {
-                dude.setTarget(map[msNow.X / 32, msNow.Y / 32], map);
+                if(view1.X > -(mapWidth*32)+2048)
+                {
+                    view1.X -= 5;
+                }      
+            }
+            if(kbNow.IsKeyDown(Keys.A))
+            {
+                if(view1.X < 0)
+                {
+                    view1.X += 5;
+                }   
+            }
+            if (kbNow.IsKeyDown(Keys.S))
+            {
+                if (view1.Y > -1024)
+                {
+                    view1.Y -= 5;
+                }
+            }
+            if (kbNow.IsKeyDown(Keys.W))
+            {
+                if (view1.Y < 0)
+                {
+                    view1.Y += 5;
+                }
+            }
+
+            if (msNow.RightButton == ButtonState.Released && msPrev.RightButton == ButtonState.Pressed)
+            {
+                dude.setTarget(map[(msNow.X-view1.X) / 32, (msNow.Y-view1.Y) / 32], map);
             }
 
             kbPrev = kbNow;
             kbNow = Keyboard.GetState();
             msPrev = msNow;
             msNow = Mouse.GetState();
+
             base.Update(gameTime);
         }
 
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.White);
+            graphics.GraphicsDevice.Viewport = view1;
             spriteBatch.Begin();
 
             foreach(Tile t in map)

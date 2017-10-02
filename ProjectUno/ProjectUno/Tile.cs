@@ -56,9 +56,9 @@ namespace ProjectUno
             speed = type.speed;
         }
 
-        public bool checkClicked(MouseState msNow, MouseState msPrev)
+        public bool checkClicked(MouseState msNow, MouseState msPrev, Viewport view1)
         {
-            if(rect.Contains(msNow.X, msNow.Y) && msPrev.LeftButton == ButtonState.Pressed && msNow.LeftButton == ButtonState.Released)
+            if(rect.Contains((msNow.X-view1.X), (msNow.Y-view1.Y)) && msPrev.LeftButton == ButtonState.Pressed && msNow.LeftButton == ButtonState.Released)
             {
                 return true;
             }
